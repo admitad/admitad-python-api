@@ -57,7 +57,7 @@ class LostOrdersManagerTestCase(BaseTestCase):
             result = self.client.LostOrdersManager.create(
                 attachments=['./pyadmitad/tests/data/image.png'],
                 website=10,
-                advcampaign=20,
+                campaign=20,
                 order_id='asd3f3',
                 order_date='01.01.2010',
                 order_price=1200,
