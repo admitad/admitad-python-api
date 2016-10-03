@@ -48,7 +48,7 @@ class LostOrdersManager(Item):
     CREATE_URL = Item.prepare_url('lost_orders/create')
 
     CREATE_FIELDS = {
-        'advcampaign': lambda x: Item.sanitize_integer_value(x, 'advcampaign'),
+        'campaign': lambda x: Item.sanitize_integer_value(x, 'campaign'),
         'website': lambda x: Item.sanitize_integer_value(x, 'website'),
         'order_id': lambda x: Item.sanitize_string_value(x, 'order_id'),
         'order_date': lambda x: Item.sanitize_date(x, 'order_date'),
@@ -73,7 +73,7 @@ class LostOrdersManager(Item):
         """
         Args:
             attachments (list of str)
-            advcampaign (int)
+            campaign (int)
             website (int)
             order_id (str)
             order_date (date)
