@@ -8,11 +8,11 @@ setup(
     author_email='dev@admitad.com',
     description='A Python wrapper around the Admitad API',
     license='MIT',
-    url='https://github.com/admitad/admitad-python-api.git',
-    keywords='admitad',
-    install_requires=['requests', 'simplejson'],
-    test_suite='nose.collector',
-    tests_require=['nose', 'mocker'],
+    url='https://github.com/admitad/admitad-python-api',
+    keywords=['admitad'],
+    install_requires=['requests>=2.0', 'future'],
+    tests_require=['nose2', 'responses'],
+    test_suite='nose2.collector.collector',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -20,8 +20,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Communications',
         'Topic :: Internet',
-    ],
-    dependency_links=[
-        "git+https://github.com/trezorg/mocker.git#egg=mocker",
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
     ],
 )

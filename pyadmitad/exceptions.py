@@ -1,8 +1,12 @@
+# coding: utf-8
+from __future__ import unicode_literals
 
 
 class HttpException(Exception):
 
     def __init__(self, status, message, content):
+        super(HttpException, self).__init__()
+
         self.status = status
         self.message = message
         self.content = content
@@ -19,6 +23,8 @@ class HttpException(Exception):
 class ConnectionException(Exception):
 
     def __init__(self, content):
+        super(ConnectionException, self).__init__()
+
         self.content = content
 
     def __str__(self):
@@ -31,6 +37,8 @@ class ConnectionException(Exception):
 class JsonException(Exception):
 
     def __init__(self, content):
+        super(JsonException, self).__init__()
+
         self.content = content
 
     def __str__(self):
@@ -43,6 +51,8 @@ class JsonException(Exception):
 class ApiException(Exception):
 
     def __init__(self, content):
+        super(ApiException, self).__init__()
+
         self.content = content
 
     def __str__(self):

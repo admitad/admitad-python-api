@@ -5,20 +5,16 @@ from pyadmitad.items.base import Item
 
 
 __all__ = [
-    'Announcements',
+    'Arecords'
 ]
 
 
-class Announcements(Item):
-    """
-    List of announcements
+class Arecords(Item):
 
-    """
+    SCOPE = 'arecords'
 
-    SCOPE = 'announcements'
-
-    URL = Item.prepare_url('announcements')
-    SINGLE_URL = Item.prepare_url('announcements/%(announcement_id)s')
+    URL = Item.prepare_url('arecords')
+    FOR_WEBSITE_URL = Item.prepare_url('arecords/%(website_id)s')
 
     def get(self, **kwargs):
         """
@@ -27,17 +23,19 @@ class Announcements(Item):
             offset (int)
 
         """
+
         return self.transport.get().set_pagination(**kwargs).request(url=self.URL)
 
-    def getOne(self, _id, **kwargs):
+    def getForWebsite(self, website_id, **kwargs):
         """
         Args:
-            _id (int)
+            website_id (int)
 
         """
+
         request_data = {
-            'url': self.SINGLE_URL,
-            'announcement_id': Item.sanitize_id(_id)
+            'url': self.FOR_WEBSITE_URL,
+            'website_id': Item.sanitize_id(website_id)
         }
 
         return self.transport.get().request(**request_data)

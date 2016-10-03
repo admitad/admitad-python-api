@@ -1,54 +1,95 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from pyadmitad.items.base import Item
 
 
-__all__ = (
+__all__ = [
     'Banners',
     'BannersForWebsite',
-)
+]
 
 
 class Banners(Item):
     """
     List of banners
 
-    Required scope - "banners"
     """
 
-    URL = Item.prepare_url('banners/%(id)s')
+    SCOPE = 'banners'
+
+    URL = Item.prepare_url('banners/%(campaign_id)s')
 
     def get(self, _id, **kwargs):
         """
         Here _id is an id of advertising campaign
 
-        res = client.Banners.get(_id=2)
-        res = client.Banners.get(2)
-        res = client.Banners.get(2, limit=2)
+        Args:
+            _id (int)
+            mobile_content (bool)
+            limit (int)
+            offset(int)
 
         """
-        kwargs['url'] = self.URL
-        kwargs['id'] = self.sanitize_id(_id)
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+        request_data = {
+            'url': self.URL,
+            'campaign_id': Item.sanitize_id(_id)
+        }
+
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'mobile_content': lambda x: Item.sanitize_bool_value(x, blank=True)
+            }
+        }
+
+        return self.transport.get() \
+                   .set_pagination(**kwargs) \
+                   .set_filtering(filtering) \
+                   .request(**request_data)
 
 
 class BannersForWebsite(Item):
     """
     List of banners for the website
 
-    Required scope - "banners_for_website"
     """
 
-    URL = Item.prepare_url('banners/%(id)s/website/%(w_id)s')
+    SCOPE = 'banners_for_website'
+
+    URL = Item.prepare_url('banners/%(campaign_id)s/website/%(website_id)s')
 
     def get(self, _id, w_id, **kwargs):
         """
         Here _id is an id of advertising campaign and
         w_id is a id of website
 
-        res = client.BannersForWebsite.get(_id=2, w_id=3)
-        res = client.BannersForWebsite.get(2, 3)
-        res = client.BannersForWebsite.get(2, 3, limit=5)
+        Args:
+            _id (int)
+            w_id (int)
+            mobile_content (bool)
+            landing (int)
+            uri_scheme (str)
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        kwargs['id'] = self.sanitize_id(_id)
-        kwargs['w_id'] = self.sanitize_id(w_id)
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+        request_data = {
+            'url': self.URL,
+            'campaign_id': Item.sanitize_id(_id),
+            'website_id': Item.sanitize_id(w_id)
+        }
+
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'mobile_content': lambda x: Item.sanitize_bool_value(x, blank=True),
+                'landing': lambda x: Item.sanitize_integer_value(x, 'landing', blank=True),
+                'uri_scheme': lambda x: Item.sanitize_string_value(x, 'uri_scheme', blank=True)
+            }
+        }
+
+        return self.transport.get() \
+                   .set_pagination(**kwargs) \
+                   .set_filtering(filtering) \
+                   .request(**request_data)

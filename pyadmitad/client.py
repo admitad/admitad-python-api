@@ -1,13 +1,7 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from pyadmitad import items
-
-
-class FailedRequest(Exception):
-
-    def __init__(self, error):
-        self.error = error
-
-    def __str__(self):
-        return repr(self.error)
 
 
 class Client(object):
