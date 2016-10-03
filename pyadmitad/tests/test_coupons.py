@@ -1,222 +1,123 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
+from __future__ import unicode_literals
 
 import unittest
-from pyadmitad.items import Coupons, CouponsForWebsite
+import responses
+
+from pyadmitad.items import Coupons, CouponsForWebsite, CouponsCategories
 from pyadmitad.tests.base import BaseTestCase
 
 
 class CouponsTestCase(BaseTestCase):
 
     def test_get_coupons_request(self):
-        self.set_mocker(Coupons.URL, limit=1)
-        result = {
-            u'results': [
-                {
-                    u'campaign': {
-                        u'id': 8,
-                        u'name': u'AdvCamp 3'
-                    },
-                    u'categories': [
-                        {
-                            u'id': 1,
-                            u'name': u'Детские товары'
-                        },
-                        {
-                            u'id': 3,
-                            u'name': u'Мода & аксессуары'
-                        },
-                        {
-                            u'id': 4,
-                            u'name': u'Обувь женская & мужская'
-                        }
-                    ],
-                    u'date_end': u'2013-05-10 23:59:59',
-                    u'date_start': u'2011-11-02 00:00:00',
-                    u'description': u'',
-                    u'exclusive': False,
-                    u'id': 1,
-                    u'image': u'https://admitad.com/media/path_img.png',
-                    u'name': u'Купон',
-                    u'rating': u'0.00',
-                    u'short_name': u'coupon',
-                    u'species': u'promocode',
-                    u'status': u'active',
-                    u'types': [
-                        {
-                            u'id': 1,
-                            u'name': u'Бесплатная доставка'
-                        }
-                    ]
-                }
-            ],
-            u'_meta': {
-                u'count': 6,
-                u'limit': 1,
-                u'offset': 0
-            },
-        }
-        self.mocker.result(result)
-        self.mocker.replay()
-        res = self.client.Coupons.get(limit=1)
-        self.assertIn(u'results', res)
-        self.assertIn(u'_meta', res)
-        self.assertIsInstance(res[u'results'], list)
-        self.assertIsInstance(res[u'_meta'], dict)
-        self.assertEqual(res[u'_meta'][u'limit'], 1)
-        self.mocker.verify()
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(Coupons.URL, params={
+                    'campaign': [1, 5, 6],
+                    'campaign_category': [11, 12],
+                    'category': [22, 23],
+                    'type': 'some',
+                    'limit': 10,
+                    'offset': 0,
+                    'order_by': ['name', '-rating']
+                }),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.Coupons.get(
+                campaign=[1, 5, 6], campaign_category=[11, 12],
+                category=[22, 23], type='some', limit=10, offset=0,
+                order_by=['name', '-rating'])
+
+        self.assertIn('status', result)
 
     def test_get_coupons_request_with_id(self):
-        self.set_mocker(Coupons.SINGLE_URL, id=1, with_pagination=False)
-        result = {
-            u'campaign': {
-                u'id': 8,
-                u'name': u'AdvCamp 3'
-            },
-            u'categories': [
-                {
-                    u'id': 1,
-                    u'name': u'Детские товары'
-                },
-                {
-                    u'id': 3,
-                    u'name': u'Мода & аксессуары'
-                },
-                {
-                    u'id': 4,
-                    u'name': u'Обувь женская & мужская'
-                }
-            ],
-            u'date_end': u'2013-05-10 23:59:59',
-            u'date_start': u'2011-11-02 00:00:00',
-            u'description': u'',
-            u'exclusive': False,
-            u'id': 1,
-            u'image': u'https://admitad.com/media/path_img.png',
-            u'name': u'Купон',
-            u'rating': u'0.00',
-            u'short_name': u'coupon',
-            u'species': u'promocode',
-            u'status': u'active',
-            u'types': [
-                {
-                    u'id': 1,
-                    u'name': u'Бесплатная доставка'
-                }
-            ]
-        }
-        self.mocker.result(result)
-        self.mocker.replay()
-        res = self.client.Coupons.getOne(1)
-        self.assertEqual(res[u'id'], 1)
-        self.mocker.verify()
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(Coupons.SINGLE_URL, coupon_id=42),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.Coupons.getOne(42)
+
+        self.assertIn('status', result)
 
 
 class CouponsForWebsiteTestCase(BaseTestCase):
 
     def test_get_coupons_for_website_request(self):
-        self.set_mocker(CouponsForWebsite.URL, id=3, limit=1)
-        result = {
-            u'results': [
-                {
-                    u'campaign': {
-                        u'id': 8,
-                        u'name': u'AdvCamp 3'
-                    },
-                    u'categories': [
-                        {
-                            u'id': 1,
-                            u'name': u'Детские товары'
-                        },
-                        {
-                            u'id': 3,
-                            u'name': u'Мода & аксессуары'
-                        },
-                        {
-                            u'id': 4,
-                            u'name': u'Обувь женская & мужская'
-                        }
-                    ],
-                    u'date_end': u'2013-05-10 23:59:59',
-                    u'date_start': u'2011-11-02 00:00:00',
-                    u'description': u'',
-                    u'exclusive': False,
-                    u'id': 1,
-                    u'image': u'https://admitad.com/media/path_img.png',
-                    u'name': u'Купон',
-                    u'rating': u'0.00',
-                    u'short_name': u'coupon',
-                    u'species': u'promocode',
-                    u'status': u'active',
-                    u'types': [
-                        {
-                            u'id': 1,
-                            u'name': u'Бесплатная доставка'
-                        }
-                    ]
-                }
-            ],
-            u'_meta': {
-                u'count': 6,
-                u'limit': 1,
-                u'offset': 0
-            },
-            }
-        self.mocker.result(result)
-        self.mocker.replay()
-        res = self.client.CouponsForWebsite.get(_id=3, limit=1)
-        self.assertIn(u'results', res)
-        self.assertIn(u'_meta', res)
-        self.assertIsInstance(res[u'results'], list)
-        self.assertIsInstance(res[u'_meta'], dict)
-        self.assertEqual(res[u'_meta'][u'limit'], 1)
-        self.mocker.verify()
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(CouponsForWebsite.URL, website_id=1, params={
+                    'campaign': [1, 5, 6],
+                    'campaign_category': [11, 12],
+                    'category': [22, 23],
+                    'type': 'some',
+                    'limit': 10,
+                    'offset': 0,
+                    'order_by': ['name', '-rating']
+                }),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.CouponsForWebsite.get(
+                1, campaign=[1, 5, 6], campaign_category=[11, 12],
+                category=[22, 23], type='some', limit=10, offset=0,
+                order_by=['name', '-rating'])
+
+        self.assertIn('status', result)
 
     def test_get_coupons_for_website_request_with_id(self):
-        self.set_mocker(
-            CouponsForWebsite.SINGLE_URL, id=3, c_id=1, with_pagination=False)
-        result = {
-            u'campaign': {
-                u'id': 8,
-                u'name': u'AdvCamp 3'
-            },
-            u'categories': [
-                {
-                    u'id': 1,
-                    u'name': u'Детские товары'
-                },
-                {
-                    u'id': 3,
-                    u'name': u'Мода & аксессуары'
-                },
-                {
-                    u'id': 4,
-                    u'name': u'Обувь женская & мужская'
-                }
-            ],
-            u'date_end': u'2013-05-10 23:59:59',
-            u'date_start': u'2011-11-02 00:00:00',
-            u'description': u'',
-            u'exclusive': False,
-            u'id': 1,
-            u'image': u'https://admitad.com/media/path_img.png',
-            u'name': u'Купон',
-            u'rating': u'0.00',
-            u'short_name': u'coupon',
-            u'species': u'promocode',
-            u'status': u'active',
-            u'types': [
-                {
-                    u'id': 1,
-                    u'name': u'Бесплатная доставка'
-                }
-            ]
-        }
-        self.mocker.result(result)
-        self.mocker.replay()
-        res = self.client.CouponsForWebsite.getOne(3, 1)
-        self.assertEqual(res[u'id'], 1)
-        self.mocker.verify()
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(CouponsForWebsite.SINGLE_URL, website_id=10, campaign_id=20),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.CouponsForWebsite.getOne(10, 20)
 
+        self.assertIn('status', result)
+
+
+class CouponsCategoriesTestCase(BaseTestCase):
+
+    def test_get_categories_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(CouponsCategories.URL, params={
+                    'limit': 10,
+                    'offset': 0
+                }),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.CouponsCategories.get(limit=10, offset=0)
+
+        self.assertIn('status', result)
+
+    def test_get_categorty_with_id_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(CouponsCategories.SINGLE_URL, coupon_category_id=200),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.CouponsCategories.getOne(200)
+
+        self.assertIn('status', result)
 
 if __name__ == '__main__':
     unittest.main()

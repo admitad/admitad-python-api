@@ -1,83 +1,149 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from pyadmitad.items.base import Item
 
 
-__all__ = (
+__all__ = [
     'Payments',
+    'PaymentsStatement',
     'PaymentsManage',
-)
+]
 
 
 class Payments(Item):
     """
     List of webmaster payments
 
-    Required scope - "payments"
     """
+
+    SCOPE = 'payments'
+
     URL = Item.prepare_url('payments')
-    SINGLE_URL = Item.prepare_url('payments/%(id)s')
+    SINGLE_URL = Item.prepare_url('payments/%(payment_id)s')
 
     def get(self, **kwargs):
         """
-        res = client.Payments.get()
-        res = client.Payments.get(limit=2)
+        Args:
+            has_statement (bool)
+            limit (int)
+            offset (int)
 
         """
-        kwargs['url'] = self.URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'has_statement': lambda x: Item.sanitize_bool_integer_value(x, 'has_statement', blank=True)
+            }
+        }
+
+        return self.transport.get() \
+                   .set_pagination(**kwargs) \
+                   .set_filtering(filtering) \
+                   .request(url=self.URL)
 
     def getOne(self, _id, **kwargs):
         """
-        res = client.Payments.getOne(_id=2)
-        res = client.Payments.getOne(2)
+        Args:
+            _id (int)
+
         """
-        kwargs['url'] = self.SINGLE_URL
-        kwargs['id'] = self.sanitize_id(_id)
-        return self.transport.set_method('GET').request(**kwargs)
+        request_data = {
+            'url': self.SINGLE_URL,
+            'payment_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.get().request(**request_data)
+
+
+class PaymentsStatement(Item):
+
+    SCOPE = 'payments'
+
+    URL = Item.prepare_url('payments/%(payment_id)s/statement')
+
+    def get(self, payment_id, **kwargs):
+        """
+        Args:
+            detailed (bool)
+            limit (int)
+            offset (int)
+
+        """
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'detailed': lambda x: Item.sanitize_bool_integer_value(x, 'detailed', blank=True)
+            }
+        }
+
+        request_data = {
+            'url': self.URL,
+            'payment_id': Item.sanitize_id(payment_id)
+        }
+
+        return self.transport.get() \
+                   .set_pagination(**kwargs) \
+                   .set_filtering(filtering) \
+                   .request(**request_data)
 
 
 class PaymentsManage(Item):
     """
     Manage payments
 
-    Required scope - "manage_websites"
     """
 
+    SCOPE = 'manage_payments'
+
     CREATE_URL = Item.prepare_url('payments/request/%(code)s')
-    CONFIRM_URL = Item.prepare_url('payments/confirm/%(id)s')
-    DELETE_URL = Item.prepare_url('payments/delete/%(id)s')
+    CONFIRM_URL = Item.prepare_url('payments/confirm/%(payment_id)s')
+    DELETE_URL = Item.prepare_url('payments/delete/%(payment_id)s')
 
     def create(self, _code, **kwargs):
         """
         Create a payment request.
         _code is a code of currency
 
-        res = client.PaymentsManage.create('USD')
+        Args:
+            _code (str)
 
         """
-        kwargs['url'] = self.CREATE_URL
-        kwargs['code'] = self.sanitize_currency(_code)
-        return self.transport.set_method('POST').request(**kwargs)
+        request_data = {
+            'url': self.CREATE_URL,
+            'code': Item.sanitize_currency_value(_code)
+        }
+
+        return self.transport.post().request(**request_data)
 
     def confirm(self, _id, **kwargs):
         """
         Confirm a payment request.
         _id is a payment id.
 
-        res = client.PaymentsManage.confirm(71)
+        Args:
+            _id (int)
 
         """
-        kwargs['url'] = self.CONFIRM_URL
-        kwargs['id'] = self.sanitize_id(_id)
-        return self.transport.set_method('POST').request(**kwargs)
+        request_data = {
+            'url': self.CONFIRM_URL,
+            'payment_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.post().request(**request_data)
 
     def delete(self, _id, **kwargs):
         """
         Delete a payment request.
         _id is a payment id.
 
-        res = client.PaymentsManage.delete(71)
+        Args:
+            _id (int)
 
         """
-        kwargs['url'] = self.DELETE_URL
-        kwargs['id'] = self.sanitize_id(_id)
-        return self.transport.set_method('POST').request(**kwargs)
+        request_data = {
+            'url': self.DELETE_URL,
+            'payment_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.post().request(**request_data)

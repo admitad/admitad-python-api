@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from pyadmitad.items.base import Item
 
 
@@ -15,89 +18,108 @@ class WebsiteTypes(Item):
     """
     List of websites types
 
-    Required scope - "public_data"
     """
+
+    SCOPE = 'public_data'
 
     URL = Item.prepare_url('websites/kinds')
 
     def get(self, **kwargs):
         """
-        res = client.WebsiteTypes.get()
-        res = client.WebsiteTypes.get(limit=2, offset=1)
-        res = client.WebsiteTypes.get(limit=2, offset=1, language='ru')
+        Args:
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+
+        return self.transport.get().set_pagination(**kwargs).request(url=self.URL)
 
 
 class WebsiteRegions(Item):
     """
     List of websites regions
 
-    Required scope - "public_data"
     """
+
+    SCOPE = 'public_data'
 
     URL = Item.prepare_url('websites/regions')
 
     def get(self, **kwargs):
         """
-        res = client.WebsiteRegions.get()
-        res = client.WebsiteRegions.get(limit=2, offset=1)
-        res = client.WebsiteRegions.get(limit=2, offset=1, language='ru')
+        Args:
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+
+        return self.transport.get().set_pagination(**kwargs).request(url=self.URL)
 
 
 class SystemLanguages(Item):
     """
     List of system languages
 
-    Required scope - "public_data"
     """
+
+    SCOPE = 'public_data'
 
     URL = Item.prepare_url('languages')
     SINGLE_URL = Item.prepare_url('languages/%(code)s')
 
     def get(self, **kwargs):
         """
-        res = client.SystemLanguages.get()
-        res = client.SystemLanguages.get(limit=2, offset=1)
+        Args:
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+
+        return self.transport.get().set_pagination(**kwargs).request(url=self.URL)
 
     def getOne(self, code='ru'):
         """
-        res = client.SystemLanguages.getOne(code='ru')
+        Args:
+            code (str)
+
         """
-        return self.transport.set_method('GET').request(url=self.SINGLE_URL, code=code)
+
+        request_data = {
+            'url': self.SINGLE_URL,
+            'code': Item.sanitize_string_value(code, 'code', 2, 2, False)
+        }
+
+        return self.transport.get().request(**request_data)
 
 
 class SystemCurrencies(Item):
     """
     List of system currencies
 
-    Required scope - "public_data"
     """
+
+    SCOPE = 'public_data'
 
     URL = Item.prepare_url('currencies')
 
     def get(self, **kwargs):
         """
-        res = client.SystemCurrencies.get()
-        res = client.SystemCurrencies.get(limit=2, offset=1)
+        Args:
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+
+        return self.transport.get().set_pagination(**kwargs).request(url=self.URL)
 
 
 class AdvertiserServices(Item):
     """
     List of advertiser services
 
-    Required scope - "public_data"
     """
+
+    SCOPE = 'public_data'
 
     URL = Item.prepare_url('adservices')
     SINGLE_URL = Item.prepare_url('adservices/%(id)s')
@@ -106,51 +128,65 @@ class AdvertiserServices(Item):
 
     def get(self, **kwargs):
         """
-        res = client.AdvertiserServices.get()
-        res = client.AdvertiserServices.get(limit=2, offset=1)
+        Args:
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+
+        return self.transport.get().set_pagination(**kwargs).request(url=self.URL)
 
     def getOne(self, _id, **kwargs):
         """
-        res = client.AdvertiserServices.getOne(_id=2)
-        res = client.AdvertiserServices.getOne(1)
+        Args:
+            _id (int)
+
         """
-        kwargs['id'] = self.sanitize_id(_id)
-        kwargs['url'] = self.SINGLE_URL
-        return self.transport.set_method('GET').request(**kwargs)
+        data = {
+            'url': self.SINGLE_URL,
+            'id': Item.sanitize_id(_id),
+        }
+
+        return self.transport.get().request(**data)
 
     def getForKind(self, kind=None, **kwargs):
         """
-        Returns advertiser services for website types
+        Args:
+            kind (str)
+            limit (int)
+            offset (int)
 
-        res = client.AdvertiserServices.getForKind(kind='website')
-        res = client.AdvertiserServices.getForKind('website')
         """
-        kwargs['kind'] = self.sanitize_non_blank_value(kind, 'kind')
-        kwargs['url'] = self.KIND_URL
-        return self.transport.set_method('GET').set_pagination(**kwargs).request(**kwargs)
+        request_data = {
+            'url': self.KIND_URL,
+            'kind': self.sanitize_non_blank_value(kind, 'kind'),
+        }
+
+        return self.transport.get().set_pagination(**kwargs).request(**request_data)
 
     def getForKindOne(self, _id, kind, **kwargs):
         """
-        Returns advertiser service for website types
+        Args:
+            _id (int)
+            kind (str)
 
-        res = client.AdvertiserServices.getForKindOne(_id=2, kind='website')
-        res = client.AdvertiserServices.getForKindOne(2, 'website')
         """
-        kwargs['kind'] = self.sanitize_non_blank_value(kind, 'kind')
-        kwargs['id'] = self.sanitize_id(_id)
-        kwargs['url'] = self.KIND_SINGLE_URL
-        return self.transport.set_method('GET').request(**kwargs)
+        request_data = {
+            'url': self.KIND_SINGLE_URL,
+            'id': self.sanitize_id(_id),
+            'kind': self.sanitize_non_blank_value(kind, 'kind'),
+        }
+
+        return self.transport.get().request(**request_data)
 
 
 class CampaignCategories(Item):
     """
     List of campaigns categories
 
-    Required scope - "public_data"
     """
+
+    SCOPE = 'public_data'
 
     ORDERING = ('name',)
 
@@ -159,19 +195,42 @@ class CampaignCategories(Item):
 
     def get(self, **kwargs):
         """
-        res = client.CampaignCategories.get()
-        res = client.CampaignCategories.get(limit=2, offset=1)
+        Args:
+            campaign (list of int)
+            language (str)
+            order_by (str)
+            limit (int)
+            offset (int)
+
         """
-        kwargs['url'] = self.URL
-        kwargs['allowed_ordering'] = self.ORDERING
-        return self.transport.set_method('GET').set_pagination(**kwargs).\
-            set_ordering(**kwargs).request(**kwargs)
+        ordering = {
+            'order_by': kwargs.get('order_by', None),
+            'available': self.ORDERING
+        }
+
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'campaign': lambda x: Item.sanitize_integer_array(x, 'campaign', True),
+                'language': lambda x: Item.sanitize_string_value(x, 'language', 2, 2, True),
+            }
+        }
+
+        return self.transport.get() \
+                   .set_pagination(**kwargs) \
+                   .set_ordering(ordering) \
+                   .set_filtering(filtering) \
+                   .request(url=self.URL)
 
     def getOne(self, _id, **kwargs):
         """
-        res = client.CampaignCategories.getOne(_id=2)
-        res = client.CampaignCategories.getOne(2)
+        Args:
+            _id (int)
+
         """
-        kwargs['url'] = self.SINGLE_URL
-        kwargs['id'] = self.sanitize_id(_id)
-        return self.transport.set_method('GET').request(**kwargs)
+        request_data = {
+            'url': self.SINGLE_URL,
+            'id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.get().request(**request_data)

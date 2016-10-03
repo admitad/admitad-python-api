@@ -1,54 +1,79 @@
 # coding: utf-8
+from __future__ import unicode_literals
 
 import unittest
+import responses
 
 from pyadmitad.items import Announcements
 from pyadmitad.tests.base import BaseTestCase
 
 
-ANNOUNCEMENTS_RESULTS = {
-    u'results': [
-        {
-            u'message': u'Сотрудничество подтверждено',
-            u'id': 264,
-            u'advcampaign': {
-                u'id': 8,
-                u'name': u'AdvCamp 3'
-            },
-            u'event': u'request_accepted'
-        }
-    ],
-    u'_meta': {
-        u'count': 50,
-        u'limit': 1,
-        u'offset': 0
-    }
-}
-
-
 class AnnouncementsTestCase(BaseTestCase):
 
     def test_get_announcements_request(self):
-        self.set_mocker(Announcements.URL, limit=1)
-        result = ANNOUNCEMENTS_RESULTS
-        self.mocker.result(result)
-        self.mocker.replay()
-        res = self.client.Announcements.get(limit=1)
-        self.assertIn(u'results', res)
-        self.assertIn(u'_meta', res)
-        self.assertIsInstance(res[u'results'], list)
-        self.assertIsInstance(res[u'_meta'], dict)
-        self.assertEqual(res[u'_meta'][u'limit'], 1)
-        self.mocker.verify()
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(Announcements.URL, params={
+                    'limit': 1,
+                    'offset': 230
+                }),
+                match_querystring=True,
+                json={
+                    '_meta': {
+                        'count': 50,
+                        'limit': 1,
+                        'offset': 230
+                    },
+                    'results': [{
+                        'message': 'Message',
+                        'id': 264,
+                        'advcampaign': {
+                            'id': 8,
+                            'name': 'AdvCamp'
+                        },
+                        'event': 'request_accepted'
+                    }]
+                },
+                status=200
+            )
+
+            result = self.client.Announcements.get(limit=1, offset=230)
+
+        self.assertIn('_meta', result)
+        self.assertIn('results', result)
+        self.assertEqual(1, len(result['results']))
 
     def test_get_announcements_request_with_id(self):
-        self.set_mocker(Announcements.SINGLE_URL, id=264, with_pagination=False)
-        result = ANNOUNCEMENTS_RESULTS['results'][0]
-        self.mocker.result(result)
-        self.mocker.replay()
-        res = self.client.Announcements.getOne(264)
-        self.assertEqual(res[u'id'], 264)
-        self.mocker.verify()
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(Announcements.SINGLE_URL, announcement_id=264),
+                match_querystring=True,
+                json={
+                    '_meta': {
+                        'count': 50,
+                        'limit': 1,
+                        'offset': 230
+                    },
+                    'results': [{
+                        'message': 'Message',
+                        'id': 264,
+                        'advcampaign': {
+                            'id': 8,
+                            'name': 'AdvCamp'
+                        },
+                        'event': 'request_accepted'
+                    }]
+                },
+                status=200
+            )
+
+            result = self.client.Announcements.getOne(264)
+
+        self.assertIn('_meta', result)
+        self.assertIn('results', result)
+        self.assertEqual(1, len(result['results']))
 
 
 if __name__ == '__main__':

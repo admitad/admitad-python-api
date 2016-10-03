@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 from pyadmitad.items.base import Item
 
 
@@ -32,20 +35,59 @@ class BaseOptCodes(Item):
 
 class OptCodes(BaseOptCodes):
 
+    SCOPE = 'opt_codes'
+
+    ORDERING = ('action_type', 'method', 'desc_mode')
+
     URL = Item.prepare_url('opt_codes')
     SINGLE_URL = Item.prepare_url('opt_codes/%(optcode_id)s')
 
     def get(self, **kwargs):
-        kwargs['url'] = self.URL
-        return self.transport.get().set_pagination().request(**kwargs)
+        """
+        Args:
+            campaign (int)
+            website (int)
+            limit (int)
+            offset (int)
+            order_by (list of str)
+
+        """
+        ordering = {
+            'order_by': kwargs.get('order_by', []),
+            'available': self.ORDERING
+        }
+
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'campaign': lambda x: Item.sanitize_integer_value(x, 'campaign', blank=True),
+                'website': lambda x: Item.sanitize_integer_value(x, 'campaign', blank=True),
+            }
+        }
+
+        return self.transport.get() \
+                   .set_pagination(**kwargs) \
+                   .set_ordering(ordering) \
+                   .set_filtering(filtering) \
+                   .request(url=self.URL)
 
     def getOne(self, optcode_id, **kwargs):
-        kwargs['url'] = self.SINGLE_URL
-        kwargs['optcode_id'] = self.sanitize_id(optcode_id)
-        return self.transport.get().request(**kwargs)
+        """
+        Args:
+            optcode_id (int)
+
+        """
+        request_data = {
+            'url': self.SINGLE_URL,
+            'optcode_id': Item.sanitize_id(optcode_id)
+        }
+
+        return self.transport.get().request(**request_data)
 
 
 class BaseOptCodesManager(BaseOptCodes):
+
+    SCOPE = 'manage_opt_codes'
 
     DELETE_URL = Item.prepare_url('opt_codes/delete/%(optcode_id)s')
     CREATE_URL = ''
@@ -55,22 +97,24 @@ class BaseOptCodesManager(BaseOptCodes):
     UPDATE_FIELDS = {}
 
     def delete(self, optcode_id):
-        data = {
+        request_data = {
             'url': self.DELETE_URL,
-            'optcode_id': self.sanitize_id(optcode_id),
+            'optcode_id': Item.sanitize_id(optcode_id),
         }
-        return self.transport.set_method('POST').request(**data)
+        return self.transport.post().request(**request_data)
 
     def create(self, **kwargs):
-        data = self.sanitize_fields(self.CREATE_FIELDS, **kwargs)
-        kwargs['url'] = self.CREATE_URL
-        return self.transport.set_method('POST').set_data(data).request(**kwargs)
+        data = Item.sanitize_fields(self.CREATE_FIELDS, **kwargs)
+        return self.transport.post().set_data(data).request(url=self.CREATE_URL)
 
     def update(self, optcode_id, **kwargs):
-        data = self.sanitize_fields(self.UPDATE_FIELDS, **kwargs)
-        kwargs['url'] = self.UPDATE_URL
-        kwargs['optcode_id'] = self.sanitize_id(optcode_id)
-        return self.transport.set_method('POST').set_data(data).request(**kwargs)
+        data = Item.sanitize_fields(self.UPDATE_FIELDS, **kwargs)
+        request_data = {
+            'url': self.UPDATE_URL,
+            'optcode_id': Item.sanitize_id(optcode_id),
+        }
+
+        return self.transport.post().set_data(data).request(**request_data)
 
 
 class OfferStatusOptCodesManager(BaseOptCodesManager):
