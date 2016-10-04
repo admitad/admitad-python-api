@@ -11,11 +11,11 @@ Install
 Example
 -------
 ```python
-from pyadmitad import api
+from pyadmitad import api, items
 
 client_id = "[client_id]"
 client_secret = "[client_secret]"
-scope = ' '.join(set([client.Me.SCOPE]))
+scope = ' '.join(set([items.Me.SCOPE]))
 
 client = api.get_oauth_client_client(
     client_id,
