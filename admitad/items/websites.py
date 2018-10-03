@@ -110,7 +110,7 @@ class WebsitesManage(Item):
         'mailing_targeting': lambda x: Item.sanitize_bool_integer_value(
             x, 'mailing_targeting', blank=True),
         'website_subtype': lambda x: Item.sanitize_string_value(
-            x, 'website_subtype', max_length=20),
+            x, 'website_subtype', max_length=100),
     }
 
     UPDATE_FIELDS = {
@@ -133,7 +133,7 @@ class WebsitesManage(Item):
         'mailing_targeting': lambda x: Item.sanitize_bool_integer_value(
             x, 'mailing_targeting', blank=True), 
         'website_subtype': lambda x: Item.sanitize_string_value(
-            x, 'website_subtype', max_length=20),
+            x, 'website_subtype', max_length=100),
     }
 
     def create(self, **kwargs):
