@@ -64,7 +64,8 @@ class StatisticBase(Item):
         'website': lambda x: Item.sanitize_integer_value(x, 'website', blank=True),
         'campaign': lambda x: Item.sanitize_integer_value(x, 'campaign', blank=True),
         'total': lambda x: Item.sanitize_integer_value(x, 'total', blank=True),
-        'subid': lambda x: StatisticBase.check_sub_id(x)
+        'subid': lambda x: StatisticBase.check_sub_id(x),
+        'default_currency': lambda x: x
     }
 
     def get(self, url, **kwargs):
@@ -161,6 +162,7 @@ class StatisticDays(StatisticBase):
             campaign (int)
             subid (str)
             total (int)
+            default_currency (str)
             limit (int)
             offset (int)
             order_by (str)
