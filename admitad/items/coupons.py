@@ -19,6 +19,7 @@ class CouponsBase(Item):
         'campaign_category': lambda x: Item.sanitize_integer_array(x, 'campaign_category', blank=True),
         'category': lambda x: Item.sanitize_integer_array(x, 'category', blank=True),
         'type': lambda x: Item.sanitize_string_value(x, 'type', blank=True),
+        'search': lambda x: Item.sanitize_string_value(x, 'search', blank=True),
     }
 
 
@@ -39,6 +40,7 @@ class Coupons(CouponsBase):
             campaign (list of int)
             campaign_category (list of int)
             category (list of int)
+            search (str)
             type (str)
             limit (int)
             offset (int)
@@ -95,6 +97,7 @@ class CouponsForWebsite(CouponsBase):
             campaign (list of int)
             campaign_category (list of int)
             category (list of int)
+            search (str)
             type (str)
             limit (int)
             offset (int)

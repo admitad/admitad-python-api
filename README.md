@@ -419,6 +419,14 @@ res = client.LandingsForWebsite.get(10, 22, limit=100)
 res = client.DeeplinksManage.create(22, 10, ulp='https://admitad.com/some/', subid='AS32djkd31')
 ```
 
+### ShortLinks ###
+
+###### Get short link ######
+
+```python
+res = client.ShortLinks.post(link='https://ad.admitad.com/g/some/')
+```
+
 ### Referrals ###
 
 ###### List of referrals ######
