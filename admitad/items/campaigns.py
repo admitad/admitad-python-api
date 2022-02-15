@@ -83,12 +83,19 @@ class CampaignsForWebsite(Item):
             offset (int)
 
         """
+        filtering = {
+            'filter_by': kwargs,
+            'available': {
+                'has_tool': lambda x: Item.sanitize_string_array(x, 'has_tool', blank=True),
+                'connection_status': lambda x: Item.sanitize_string_value(x, 'connection_status', blank=True),
+            }
+        }
         request_data = {
             'url': self.URL,
             'website_id': Item.sanitize_id(_id)
         }
 
-        return self.transport.get().set_pagination(**kwargs).request(**request_data)
+        return self.transport.get().set_pagination(**kwargs).set_filtering(filtering).request(**request_data)
 
     def getOne(self, _id, c_id, **kwargs):
         """
