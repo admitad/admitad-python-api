@@ -22,6 +22,7 @@ class CouponsBase(Item):
         'is_exclusive': lambda x: Item.sanitize_bool_value(x, 'is_exclusive', blank=True),
         'is_unique': lambda x: Item.sanitize_bool_value(x, 'is_unique', blank=True),
         'is_planned': lambda x: Item.sanitize_bool_value(x, 'is_planned', blank=True),
+        'search': lambda x: Item.sanitize_string_value(x, 'search', blank=True),
     }
 
 
