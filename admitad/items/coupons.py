@@ -19,6 +19,9 @@ class CouponsBase(Item):
         'campaign_category': lambda x: Item.sanitize_integer_array(x, 'campaign_category', blank=True),
         'category': lambda x: Item.sanitize_integer_array(x, 'category', blank=True),
         'type': lambda x: Item.sanitize_string_value(x, 'type', blank=True),
+        'is_exclusive': lambda x: Item.sanitize_bool_value(x, 'is_exclusive', blank=True),
+        'is_unique': lambda x: Item.sanitize_bool_value(x, 'is_unique', blank=True),
+        'is_planned': lambda x: Item.sanitize_bool_value(x, 'is_planned', blank=True),
     }
 
 
