@@ -17,7 +17,7 @@ class DeeplinksManage(Item):
 
     CREATE_FIELDS = {
         'ulp': lambda x: Item.sanitize_string_array(x, 'ulp'),
-        'subid': lambda x: Item.sanitize_string_value(x, 'subid', max_length=30),
+        'subid': lambda x: Item.sanitize_string_value(x, 'subid', max_length=30, blank=True),
         # todo: subid[1-4]
     }
 
