@@ -1,4 +1,5 @@
 import os
+
 DATE_FORMAT: str = '%d.%m.%Y'
 LONG_DATE_FORMAT: str = '%d.%m.%Y %H:%M:%S'
 
