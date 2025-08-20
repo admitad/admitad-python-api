@@ -1,17 +1,10 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
-from future import standard_library
-standard_library.install_aliases()
-
-from future.builtins import int, str
 from datetime import datetime, date
 from urllib.parse import urljoin
 
 from admitad.constants import BASE_URL, DATE_FORMAT, LONG_DATE_FORMAT
 
 
-class Item(object):
+class Item:
 
     def __init__(self, transport):
         self.transport = transport

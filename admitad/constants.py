@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 # API date-format
 DATE_FORMAT = '%d.%m.%Y'
 LONG_DATE_FORMAT = '%d.%m.%Y %H:%M:%S'
