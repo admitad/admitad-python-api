@@ -4,6 +4,7 @@
 *.so
 
 # Packages
+.eggs
 *.egg
 *.egg-info
 dist
@@ -33,7 +34,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-
+.venv
 .idea
 *.sublime*
 
