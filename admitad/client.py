@@ -1,14 +1,11 @@
-# coding: utf-8
-from __future__ import unicode_literals
+from dataclasses import dataclass
 
-from admitad import items
+from admitad import items, transport
 
 
-class Client(object):
-    """The API client."""
+@dataclass
+class Client:
+    _transport: transport.HttpTransport
 
-    def __init__(self, transport):
-        self.transport = transport
-
-    def __getattr__(self, name):
-        return getattr(items, name)(self.transport)
+    def __getattr__(self, name: str) -> type[items.Item]:
+        return getattr(items, name)(self._transport)

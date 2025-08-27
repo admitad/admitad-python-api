@@ -1,62 +1,34 @@
-# coding: utf-8
-from __future__ import unicode_literals
+from dataclasses import dataclass
 
 
+@dataclass
 class HttpException(Exception):
+    status: int
+    message: str
+    content: str
 
-    def __init__(self, status, message, content):
-        super(HttpException, self).__init__()
+    def __str__(self) -> str:
+        return f"HttpException({self.status}): {self.message}\n{self.content}"
 
-        self.status = status
-        self.message = message
-        self.content = content
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return "HttpException(%s): %s%s" % (
-            self.status, self.content,
-            "\n%s" % self.message if self.message else "")
-
-
+@dataclass
 class ConnectionException(Exception):
+    content: str
 
-    def __init__(self, content):
-        super(ConnectionException, self).__init__()
-
-        self.content = content
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return "ConnectionException: %s" % self.content
+    def __str__(self) -> str:
+        return f"ConnectionException: {self.content}"
 
 
+@dataclass
 class JsonException(Exception):
+    content: str
 
-    def __init__(self, content):
-        super(JsonException, self).__init__()
-
-        self.content = content
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return "JsonException: %s" % self.content
+    def __str__(self) -> str:
+        return f"JsonException: {self.content}"
 
 
+@dataclass
 class ApiException(Exception):
+    content: str
 
-    def __init__(self, content):
-        super(ApiException, self).__init__()
-
-        self.content = content
-
-    def __str__(self):
-        return repr(self)
-
-    def __repr__(self):
-        return "ApiException: %s" % self.content
+    def __str__(self) -> str:
+        return f"ApiException: {self.content}"

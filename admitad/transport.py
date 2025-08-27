@@ -1,28 +1,31 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
 import json
 import logging
 from base64 import b64encode
+from typing import ClassVar, Literal
 
 import requests
 
-from admitad.constants import DEFAULT_PAGINATION_LIMIT, DEFAULT_PAGINATION_OFFSET, \
-    DEFAULT_REQUEST_TIMEOUT, MAX_PAGINATION_LIMIT, TOKEN_URL
+from admitad.constants import (
+    DEFAULT_PAGINATION_LIMIT,
+    DEFAULT_PAGINATION_OFFSET,
+    DEFAULT_REQUEST_TIMEOUT,
+    MAX_PAGINATION_LIMIT,
+    TOKEN_URL,
+)
 from admitad.exceptions import HttpException, ConnectionException, JsonException
 
 LOG = logging.getLogger(__file__)
 LOG.addHandler(logging.StreamHandler())
 
 
-def to_json(content):
+def to_json(content: str | bytes | bytearray) -> dict:
     try:
         return json.loads(content)
     except (TypeError, ValueError):
         return content
 
 
-def debug_log(value, debug=True):
+def debug_log(value: str, debug: bool = True) -> None:
     if debug:
         LOG.setLevel(logging.DEBUG)
         LOG.debug(value)
@@ -30,13 +33,13 @@ def debug_log(value, debug=True):
         LOG.setLevel(logging.NOTSET)
 
 
-def get_credentials(client_id, client_secret):
+def get_credentials(client_id: str, client_secret: str) -> str:
     return b64encode(
         ('%s:%s' % (client_id, client_secret)).encode('utf-8')
     ).decode('utf-8')
 
 
-def build_headers(access_token, user_agent=None):
+def build_headers(access_token: str, user_agent: str | None = None) -> dict:
     headers = {
         'Authorization': 'Bearer %s' % access_token,
         'Connection': 'Keep-Alive',
@@ -47,7 +50,7 @@ def build_headers(access_token, user_agent=None):
     return headers
 
 
-def prepare_data(data=None):
+def prepare_data(data: dict | None = None) -> dict | None:
     if data:
         new_data = {}
         for key, value in data.items():
@@ -59,8 +62,13 @@ def prepare_data(data=None):
     return data
 
 
-def prepare_request_data(data=None, headers=None, method='GET',
-                         timeout=None, ssl_verify=False):
+def prepare_request_data(
+    data: dict | None = None,
+    headers: dict | None = None,
+    method: Literal['GET', 'POST', 'DELETE', 'PUT'] = 'GET',
+    timeout: int | None = None,
+    ssl_verify: bool = False,
+) -> dict:
     kwargs = {
         'headers': headers if headers is not None else {},
         'timeout': timeout if timeout is not None else DEFAULT_REQUEST_TIMEOUT,
@@ -78,10 +86,23 @@ def prepare_request_data(data=None, headers=None, method='GET',
     return kwargs
 
 
-def api_request(url, data=None, headers=None, method='GET',
-                files=None, timeout=None, ssl_verify=True, debug=False):
-    kwargs = prepare_request_data(data=data, headers=headers, method=method,
-                                  timeout=timeout, ssl_verify=ssl_verify)
+def api_request(
+    url: str,
+    data: dict | None = None,
+    headers: dict | None = None,
+    method: Literal['GET', 'POST', 'DELETE', 'PUT'] = 'GET',
+    files: dict | None = None,
+    timeout: int | None = None,
+    ssl_verify: bool = True,
+    debug: bool = False,
+) -> dict:
+    kwargs = prepare_request_data(
+        data=data,
+        headers=headers,
+        method=method,
+        timeout=timeout,
+        ssl_verify=ssl_verify,
+    )
     status_code = 500
     content = ''
     try:
@@ -91,8 +112,7 @@ def api_request(url, data=None, headers=None, method='GET',
         #     debug_log('Request body: %s' % response.request.body, debug)
         status_code = response.status_code
         content = response.content
-        if status_code >= 400:
-            response.raise_for_status()
+        response.raise_for_status()
     except requests.HTTPError as err:
         raise HttpException(status_code, to_json(content), err)
     except requests.RequestException as err:
@@ -101,8 +121,7 @@ def api_request(url, data=None, headers=None, method='GET',
         raise JsonException(err)
     return response.json()
 
-
-def oauth_refresh_access_token(data):
+def oauth_refresh_access_token(data: dict) -> dict:
     """
     refresh an access token. Returns dictionary with new access_token.
     data['access-token']
@@ -123,10 +142,15 @@ def oauth_refresh_access_token(data):
         'refresh_token': refresh_token
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    return api_request(TOKEN_URL, method='POST', data=params, headers=headers)
+    return api_request(
+        url=TOKEN_URL,
+        method='POST',
+        data=params,
+        headers=headers,
+    )
 
 
-def oauth_client_authorization(data):
+def oauth_client_authorization(data: dict) -> dict:
     """
     OAuth2 client authorization.
     Used to get an access_token with the oauth client credentials
@@ -149,14 +173,23 @@ def oauth_client_authorization(data):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': 'Basic %s' % credentials
     }
-    return api_request(TOKEN_URL, method='POST', data=params, headers=headers)
+    return api_request(
+        url=TOKEN_URL,
+        method='POST',
+        data=params,
+        headers=headers,
+    )
 
 
-class HttpTransport(object):
+class HttpTransport:
+    SUPPORTED_METHODS: ClassVar[tuple[Literal['GET', 'POST', 'DELETE', 'PUT']]] = ('GET', 'POST', 'DELETE', 'PUT')
 
-    SUPPORTED_METHODS = ('GET', 'POST', 'DELETE', 'PUT')
-
-    def __init__(self, access_token, user_agent=None, debug=False):
+    def __init__(
+        self,
+        access_token: str,
+        user_agent: str | None = None,
+        debug: bool = False,
+    ):
         self._headers = build_headers(access_token, user_agent=user_agent)
         self._method = 'GET'
         self._files = None
@@ -164,7 +197,7 @@ class HttpTransport(object):
         self._url = None
         self._debug = debug
 
-    def set_method(self, method):
+    def set_method(self, method: Literal['GET', 'POST', 'DELETE', 'PUT']) -> 'HttpTransport':
         if method in self.SUPPORTED_METHODS:
             self._method = method
         else:
@@ -172,45 +205,45 @@ class HttpTransport(object):
         # here we should clean data
         return self.clean_data()
 
-    def get(self):
+    def get(self) -> 'HttpTransport':
         return self.set_method('GET')
 
-    def post(self):
+    def post(self) -> 'HttpTransport':
         return self.set_method('POST')
 
-    def put(self):
+    def put(self) -> 'HttpTransport':
         return self.set_method('PUT')
 
-    def delete(self):
+    def delete(self) -> 'HttpTransport':
         return self.set_method('DELETE')
 
-    def set_debug(self, debug):
+    def set_debug(self, debug: bool) -> 'HttpTransport':
         self._debug = debug
         return self
 
-    def set_url(self, url, **kwargs):
+    def set_url(self, url: str, **kwargs: dict) -> 'HttpTransport':
         self._url = url % kwargs
         return self
 
-    def set_data(self, data):
+    def set_data(self, data: dict) -> 'HttpTransport':
         self._data = data
         return self
 
-    def clean_data(self):
+    def clean_data(self) -> 'HttpTransport':
         self._data = None
         return self
 
-    def update_data(self, values):
+    def update_data(self, values: dict | None) -> 'HttpTransport':
         if self._data is None:
             self._data = {}
         self._data.update(values)
         return self
 
-    def set_files(self, files):
+    def set_files(self, files) -> 'HttpTransport':
         self._files = files
         return self
 
-    def set_pagination(self, **kwargs):
+    def set_pagination(self, **kwargs) -> 'HttpTransport':
         limit = kwargs.get('limit', DEFAULT_PAGINATION_LIMIT)
         offset = kwargs.get('offset', DEFAULT_PAGINATION_OFFSET)
 
@@ -221,7 +254,7 @@ class HttpTransport(object):
 
         return self.update_data(data)
 
-    def set_ordering(self, ordering):
+    def set_ordering(self, ordering) -> 'HttpTransport':
         order_by = ordering.get('order_by', [])
         available = ordering.get('available', [])
 
@@ -235,7 +268,7 @@ class HttpTransport(object):
 
         return self.update_data(data)
 
-    def set_filtering(self, filtering):
+    def set_filtering(self, filtering) -> 'HttpTransport':
         filter_by = filtering.get('filter_by', {})
         available = filtering.get('available', {})
 
@@ -243,7 +276,7 @@ class HttpTransport(object):
 
         return self.update_data(data)
 
-    def request(self, **kwargs):
+    def request(self, **kwargs: dict) -> dict:
         if 'url' in kwargs:
             self.set_url(kwargs.pop('url'), **kwargs)
         if 'debug' in kwargs:
@@ -254,25 +287,41 @@ class HttpTransport(object):
                 'url parameter in this method.'
             )
 
-        requests_kwargs = {
-            'method': self._method,
-            'headers': self._headers,
-            'data': self._data,
-            'debug': self._debug,
-            'files': self._files,
-        }
-        response = HttpTransport.api_request(self._url, **requests_kwargs)
+        response = HttpTransport.api_request(
+            url=self._url,
+            method=self._method,
+            headers=self._headers,
+            data=self._data,
+            debug=self._debug,
+            files=self._files,
+        )
         handler = kwargs.get('handler', self._handle_response)
 
         return handler(response)
 
     @staticmethod
-    def api_request(url, **kwargs):
-        return api_request(url, **kwargs)
+    def api_request(
+        url: str,
+        method: Literal['GET', 'POST', 'DELETE', 'PUT'],
+        headers: dict | None = None,
+        data: dict | None = None,
+        debug: bool = False,
+        files: dict | None = None,
+        **kwargs: dict,
+    ) -> dict:
+        return api_request(
+            url=url,
+            method=method,
+            headers=headers,
+            data=data,
+            debug=debug,
+            files=files,
+            **kwargs,
+        )
 
     @staticmethod
-    def _handle_response(response):
+    def _handle_response(response: dict) -> dict:
         return response
 
-    def __call__(self, **kwargs):
+    def __call__(self, **kwargs: dict) -> dict:
         return self.request(**kwargs)
