@@ -153,7 +153,7 @@ class Item:
         raise ValueError("Invalid date: %s" % value)
 
     @staticmethod
-    def prepare_url(path):
+    def prepare_url(path: str) -> str:
         url = urljoin(BASE_URL, path)
         if not url.endswith('/'):
             url += '/'

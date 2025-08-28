@@ -1,12 +1,11 @@
-# coding: utf-8
-from __future__ import unicode_literals
-
+from typing import Callable, ClassVar
 from admitad.items.base import Item
 
 
 __all__ = (
     'Websites',
-    'WebsitesManage'
+    'WebsitesManage',
+    'WebsitesManageV2'
 )
 
 
@@ -132,7 +131,7 @@ class WebsitesManage(Item):
             x, 'mailing_targeting', blank=True)
     }
 
-    def create(self, **kwargs):
+    def create(self, **kwargs: dict) -> dict:
         """
         Args:
             name (str)
@@ -150,7 +149,7 @@ class WebsitesManage(Item):
 
         return self.transport.post().set_data(data).request(url=self.CREATE_URL)
 
-    def update(self, _id, **kwargs):
+    def update(self, _id: int, **kwargs: dict) -> dict:
         """
         Args:
             _id (int)
@@ -174,7 +173,7 @@ class WebsitesManage(Item):
 
         return self.transport.post().set_data(data).request(**request_data)
 
-    def verify(self, _id):
+    def verify(self, _id: int) -> dict:
         """
         Args:
             _id (int)
@@ -187,7 +186,7 @@ class WebsitesManage(Item):
 
         return self.transport.post().request(**request_data)
 
-    def delete(self, _id):
+    def delete(self, _id: int) -> dict:
         """
         Args:
             _id (int)
@@ -199,3 +198,36 @@ class WebsitesManage(Item):
         }
 
         return self.transport.post().request(**request_data)
+
+
+class WebsitesManageV2(Item):
+    """
+    Manage websites using v2 API
+
+    """
+
+    SCOPE: ClassVar[str] = 'manage_websites'
+    CREATE_URL: ClassVar[str] = Item.prepare_url('websites/v2/create')
+
+    CREATE_FIELDS: ClassVar[dict[str, Callable]] = {
+        'name': lambda x: Item.sanitize_string_value(x, 'name', max_length=200),
+        'kind': lambda x: Item.sanitize_string_value(x, 'kind', max_length=20),
+        'url': lambda x: Item.sanitize_string_value(x, 'url', max_length=255),
+        'category': lambda x: Item.sanitize_integer_array(x, 'category'),
+        'region': lambda x: Item.sanitize_string_array(x, 'region'),
+    }
+
+
+    def create(self, **kwargs: dict) -> dict:
+        """
+        Args:
+            name (str)
+            kind (str)
+            url (str)
+            category (list of int)
+            region (list of str)
+
+        """
+        data = Item.sanitize_fields(self.CREATE_FIELDS, **kwargs)
+
+        return self.transport.post().set_data(data).request(url=self.CREATE_URL)
