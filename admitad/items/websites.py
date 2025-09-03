@@ -6,7 +6,8 @@ from admitad.items.base import Item
 
 __all__ = (
     'Websites',
-    'WebsitesManage'
+    'WebsitesManage',
+    'WebsitesManageV2'
 )
 
 
@@ -199,3 +200,114 @@ class WebsitesManage(Item):
         }
 
         return self.transport.post().request(**request_data)
+
+
+class WebsitesManageV2(Item):
+    """
+    Manage websites using v2 API
+
+    """
+
+    SCOPE = 'manage_websites'
+    CREATE_URL = Item.prepare_url('websites/v2/create')
+    UPDATE_URL = Item.prepare_url('websites/v2/update/%(website_id)s')
+    VERIFY_URL = Item.prepare_url('websites/v2/verify/%(website_id)s')
+    DELETE_URL = Item.prepare_url('websites/v2/delete/%(website_id)s')
+    GET_URL = Item.prepare_url('websites/v2')
+    GET_ONE_URL = Item.prepare_url('websites/v2/%(website_id)s')
+
+    CREATE_FIELDS = {
+        'name': lambda x: Item.sanitize_string_value(x, 'name', max_length=200),
+        'kind': lambda x: Item.sanitize_string_value(x, 'kind', max_length=20),
+        'url': lambda x: Item.sanitize_string_value(x, 'url', max_length=255),
+        'category': lambda x: Item.sanitize_integer_array(x, 'category'),
+        'region': lambda x: Item.sanitize_string_array(x, 'region'),
+    }
+
+    UPDATE_FIELDS = {
+        'name': lambda x: Item.sanitize_string_value(x, 'name', max_length=200, blank=True),
+        'url': lambda x: Item.sanitize_string_value(x, 'url', max_length=255, blank=True),
+    }
+
+    def create(self, **kwargs: dict[str, int | str]) -> dict:
+        """
+        Args:
+            name (str) - website name
+            kind (str) - website kind
+            url (str) - website url
+            category (list of int) - website categories
+            region (list of str) - website regions
+
+        """
+        data = Item.sanitize_fields(self.CREATE_FIELDS, **kwargs)
+
+        return self.transport.post().set_data(data).request(url=self.CREATE_URL)
+
+    def update(self, _id: int, **kwargs: dict[str, int | str]) -> dict:
+        """
+        Args:
+            _id (int) - website id
+            name (str) - website name
+            url (str) - website url
+
+        """
+        data = Item.sanitize_fields(self.UPDATE_FIELDS, **kwargs)
+
+        request_data = {
+            'url': self.UPDATE_URL,
+            'website_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.post().set_data(data).request(**request_data)
+
+    def verify(self, _id: int) -> dict:
+        """
+        Args:
+            _id (int) - website id
+
+        """
+        request_data = {
+            'url': self.VERIFY_URL,
+            'website_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.post().request(**request_data)
+
+    def delete(self, _id: int) -> dict:
+        """
+        Args:
+            _id (int) - website id
+
+        """
+        request_data = {
+            'url': self.DELETE_URL,
+            'website_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.post().request(**request_data)
+
+    def get(self, **kwargs: dict[str, int | str]) -> dict:
+        """
+        Args:
+            limit (int)
+            offset (int)
+
+        """
+        return (
+            self.transport.get()
+            .set_pagination(**kwargs)
+            .request(url=self.GET_URL)
+        )
+
+    def getOne(self, _id: int, **_: dict[str, int | str]) -> dict:
+        """
+        Args:
+            _id (int) - website id
+
+        """
+        requests_data = {
+            'url': self.GET_ONE_URL,
+            'website_id': Item.sanitize_id(_id)
+        }
+
+        return self.transport.get().request(**requests_data)

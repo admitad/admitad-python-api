@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import unittest
 import responses
 
-from admitad.items import Websites, WebsitesManage
+from admitad.items import Websites, WebsitesManage, WebsitesManageV2
 from admitad.tests.base import BaseTestCase
 
 
@@ -155,7 +155,7 @@ class WebsitesManageTestCase(BaseTestCase):
                     'is_old': False,
                     'mailing_targeting': True,
                     'regions': ['RU'],
-                    'site_url': 'https://foobar.bar/',
+                    'site_url': 'https://foobar.baz/',
                     'validation_passed': False,
                     'verification_code': '244a5d4a14',
                     'atnd_hits': 500,
@@ -262,6 +262,189 @@ class WebsitesManageTestCase(BaseTestCase):
 
         self.assertIn('message', result)
         self.assertIn('success', result)
+
+
+class WebsitesManageV2TestCase(BaseTestCase):
+
+    def test_create_website_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.POST,
+                self.prepare_url(WebsitesManageV2.CREATE_URL),
+                match_querystring=True,
+                json={
+                    'id': 30,
+                    'status': 'new',
+                    'kind': 'social_network_vk',
+                    'name': 'test website',
+                    'site_url': 'http://vk.com/xui',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': '',
+                    'validation_passed': False,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.create(
+                name='test website',
+                kind='social_network_vk',
+                url='http://vk.com/xui',
+                category=[1, 2],
+                region=['RU'],
+            )
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertIn('status', result)
+        self.assertIn('kind', result)
+        self.assertIn('verification_code', result)
+        self.assertIn('site_url', result)
+        self.assertIn('creation_date', result)
+        self.assertIn('is_old', result)
+        self.assertIn('account_id', result)
+        self.assertIn('validation_passed', result)
+        self.assertIn('is_lite', result)
+
+    def test_update_website_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.POST,
+                self.prepare_url(WebsitesManageV2.UPDATE_URL, website_id=30),
+                json={
+                    'id': 30,
+                    'status': 'new',
+                    'kind': 'social_network_vk',
+                    'name': 'updated website',
+                    'site_url': 'http://vk.com/updated',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': '',
+                    'validation_passed': False,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.update(
+                30,
+                name='updated website',
+                url='http://vk.com/updated',
+            )
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertIn('site_url', result)
+        self.assertEqual(result['name'], 'updated website')
+        self.assertEqual(result['site_url'], 'http://vk.com/updated')
+
+    def test_verify_website_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.POST,
+                self.prepare_url(WebsitesManageV2.VERIFY_URL, website_id=30),
+                json={
+                    'success': 'Accepted',
+                    'message': 'Площадка прошла автоматическую проверку.'
+                },
+                status=202
+            )
+
+            result = self.client.WebsitesManageV2.verify(30)
+
+        self.assertIn('success', result)
+        self.assertIn('message', result)
+        self.assertEqual(result['success'], 'Accepted')
+
+    def test_delete_website_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.POST,
+                self.prepare_url(WebsitesManageV2.DELETE_URL, website_id=30),
+                json={},
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.delete(30)
+
+        self.assertEqual(result, {})
+
+    def test_get_websites_request(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(WebsitesManageV2.GET_URL, params={
+                    'limit': 10,
+                    'offset': 0
+                }),
+                match_querystring=True,
+                json={
+                    'results': [{
+                        'id': 30,
+                        'status': 'new',
+                        'kind': 'social_network_vk',
+                        'name': 'test website',
+                        'site_url': 'http://vk.com/xui',
+                        'verification_code': '074a583c47',
+                        'creation_date': '2025-08-28T12:54:24',
+                        'is_old': False,
+                        'account_id': '',
+                        'validation_passed': False,
+                        'is_lite': False,
+                    }],
+                    '_meta': {
+                        'limit': 10,
+                        'offset': 0,
+                        'count': 1,
+                    }
+                },
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.get(limit=10, offset=0)
+
+        self.assertIn('results', result)
+        self.assertIn('_meta', result)
+        self.assertEqual(len(result['results']), 1)
+        self.assertEqual(result['_meta']['count'], 1)
+
+    def test_get_website_request_with_id(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(WebsitesManageV2.GET_ONE_URL, website_id=30),
+                json={
+                    'id': 30,
+                    'status': 'new',
+                    'kind': 'social_network_vk',
+                    'name': 'test website',
+                    'site_url': 'http://vk.com/xui',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': '',
+                    'validation_passed': False,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.getOne(30)
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertIn('status', result)
+        self.assertIn('kind', result)
+        self.assertIn('verification_code', result)
+        self.assertIn('site_url', result)
+        self.assertIn('creation_date', result)
+        self.assertIn('is_old', result)
+        self.assertIn('account_id', result)
+        self.assertIn('validation_passed', result)
+        self.assertIn('is_lite', result)
 
 
 if __name__ == '__main__':
