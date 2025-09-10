@@ -38,7 +38,7 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
                 },
                 status=200
             )
-            result = self.client.PromoOfferRequestTrackingCode.request(
+            result = self.client.PromoOfferRequestTrackingCode.create(
                 coupon_id=100,
                 advcampaign_id=200,
                 website_id=300
@@ -55,11 +55,12 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
                 PromoOfferRequestTrackingCode.URL,
                 json={
                     'assigned_promo_code': None,
-                    'tracking_link': None
+                    'tracking_link': None,
+                    'request_id': 123,
                 },
                 status=200
             )
-            result = self.client.PromoOfferRequestTrackingCode.request(
+            result = self.client.PromoOfferRequestTrackingCode.create(
                 coupon_id=100,
                 advcampaign_id=200,
                 website_id=300
@@ -69,6 +70,7 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
         self.assertIn('tracking_link', result)
         self.assertIsNone(result['assigned_promo_code'])
         self.assertIsNone(result['tracking_link'])
+        self.assertEqual(result['request_id'], 123)
 
     def test_request_tracking_promo_code_no_coupon_error(self) -> None:
         with responses.RequestsMock() as resp:
@@ -81,7 +83,7 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
                 status=400
             )
             with self.assertRaises(HttpException):
-                self.client.PromoOfferRequestTrackingCode.request(
+                self.client.PromoOfferRequestTrackingCode.create(
                     coupon_id=100,
                     advcampaign_id=200,
                     website_id=300
@@ -98,7 +100,7 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
                 status=400
             )
             with self.assertRaises(HttpException):
-                self.client.PromoOfferRequestTrackingCode.request(
+                self.client.PromoOfferRequestTrackingCode.create(
                     coupon_id=100,
                     advcampaign_id=200,
                     website_id=300
@@ -106,15 +108,15 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
 
     def test_request_tracking_promo_code_invalid_coupon_id(self) -> None:
         with self.assertRaises(ValueError):
-            self.client.PromoOfferRequestTrackingCode.request(
-                coupon_id=0,
+            self.client.PromoOfferRequestTrackingCode.create(
+                coupon_id=0,  # Invalid ID
                 advcampaign_id=200,
                 website_id=300
             )
 
     def test_request_tracking_promo_code_invalid_advcampaign_id(self) -> None:
         with self.assertRaises(ValueError):
-            self.client.PromoOfferRequestTrackingCode.request(
+            self.client.PromoOfferRequestTrackingCode.create(
                 coupon_id=100,
                 advcampaign_id=0,
                 website_id=300
@@ -122,7 +124,7 @@ class PromoOfferRequestTrackingCodeTestCase(BaseTestCase):
 
     def test_request_tracking_promo_code_invalid_website_id(self) -> None:
         with self.assertRaises(ValueError):
-            self.client.PromoOfferRequestTrackingCode.request(
+            self.client.PromoOfferRequestTrackingCode.create(
                 coupon_id=100,
                 advcampaign_id=200,
                 website_id=0,

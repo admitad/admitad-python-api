@@ -43,9 +43,10 @@ class PromoOfferRequestTrackingCode(Item):
 
     SCOPE = 'request_tracking_coupon'
 
-    URL = Item.prepare_url('advcampaigns/request-tracking-coupon')
+    CREATE_URL = Item.prepare_url('tracking_promo_code/request-tracking-coupon')
+    GET_STATUS_URL = Item.prepare_url('tracking_promo_codes/request-status')
 
-    def request(
+    def create(
         self,
         coupon_id: int,
         advcampaign_id: int,
@@ -62,6 +63,7 @@ class PromoOfferRequestTrackingCode(Item):
                 {
                     "assigned_promo_code": str | None,  # promo code or None if request is created
                     "tracking_link": str | None,        # tracking link or None
+                    "request_id": int | None,           # request id or None
                 }
         """
         request_data = {
@@ -73,5 +75,31 @@ class PromoOfferRequestTrackingCode(Item):
         return (
             self.transport.post()
             .set_data(request_data)
-            .request(url=self.URL)
+            .request(url=self.CREATE_URL)
+        )
+
+    def get(self, request_id: int) -> dict:
+        """
+        Args:
+            request_id:  Admitad promocode request id
+
+        Returns:
+            dict: Status of the promocode request
+            {
+                "request_id": int,
+                "promo_offer_id": int,
+                "website_id": int,
+                "status": str,
+                "approved_at": datetime | None,
+                "declined_at": datetime | None,
+                "created_at": datetime,
+                "assigned_promo_code": str | None,
+            }
+        """
+        request_id = Item.sanitize_id(request_id)
+
+        return (
+            self.transport.get()
+            .set_params({'request_id': request_id})
+            .request(url=self.GET_STATUS_URL)
         )
