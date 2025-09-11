@@ -44,7 +44,7 @@ class PromoOfferRequestTrackingCode(Item):
     SCOPE = 'request_tracking_coupon'
 
     CREATE_URL = Item.prepare_url('tracking_promo_code/request-tracking-coupon')
-    GET_STATUS_URL = Item.prepare_url('tracking_promo_codes/request-status')
+    GET_STATUS_URL = Item.prepare_url('tracking_promo_code/request-status')
 
     def create(
         self,
@@ -98,8 +98,12 @@ class PromoOfferRequestTrackingCode(Item):
         """
         request_id = Item.sanitize_id(request_id)
 
+        request_data = {
+            'request_id': request_id,
+        }
+
         return (
             self.transport.get()
-            .set_params({'request_id': request_id})
+            .set_data(request_data)
             .request(url=self.GET_STATUS_URL)
         )
