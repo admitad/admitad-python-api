@@ -218,7 +218,7 @@ class WebsitesManageV2(Item):
 
     CREATE_FIELDS = {
         'name': lambda x: Item.sanitize_string_value(x, 'name', max_length=200),
-        'kind': lambda x: Item.sanitize_string_value(x, 'kind', max_length=20),
+        'kind': lambda x: Item.sanitize_string_value(x, 'kind', max_length=50),
         'url': lambda x: Item.sanitize_string_value(x, 'url', max_length=255),
         'category': lambda x: Item.sanitize_integer_array(x, 'category'),
         'region': lambda x: Item.sanitize_string_array(x, 'region'),
