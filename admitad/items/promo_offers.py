@@ -4,6 +4,7 @@ from admitad.items.base import Item
 __all__ = [
     'PromoOffersForCampaign',
     'PromoOfferRequestTrackingCode',
+    'PromoOffersRevocationStatus',
 ]
 
 
@@ -106,4 +107,40 @@ class PromoOfferRequestTrackingCode(Item):
             self.transport.get()
             .set_data(request_data)
             .request(url=self.GET_STATUS_URL)
+        )
+
+
+class PromoOffersRevocationStatus(Item):
+    """
+    Get revocation status of promo codes for specific promo offer
+    """
+
+    SCOPE = 'public_data'
+
+    REVOCATION_STATUS_URL = Item.prepare_url('promo_offers/revocation_status/%(pk)s')
+
+    def get(self, _id: int, website_id: int) -> dict:
+        """
+        Args:
+            _id (int): promo offer id
+            website_id (int): website id
+
+        Returns:
+            list: Revocation status of promo codes that have history for this website
+            [
+                {"promocode_value": "promocode1", "status": "active"},
+                {"promocode_value": "promocode2", "status": "revoked"},
+                ...
+            ]
+        """
+        request_data = {
+            'url': self.REVOCATION_STATUS_URL,
+            'pk': Item.sanitize_id(_id),
+            'website_id': Item.sanitize_id(website_id)
+        }
+
+        return (
+            self.transport.get()
+            .set_data(request_data)
+            .request(url=self.REVOCATION_STATUS_URL, pk=Item.sanitize_id(_id))
         )
