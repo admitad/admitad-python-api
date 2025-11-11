@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import unittest
+from urllib.parse import quote
+
 import responses
 
 from admitad.items import Websites, WebsitesManage, WebsitesManageV2
@@ -445,6 +447,135 @@ class WebsitesManageV2TestCase(BaseTestCase):
         self.assertIn('account_id', result)
         self.assertIn('validation_passed', result)
         self.assertIn('is_lite', result)
+
+    def test_get_website_request_with_name(self):
+        with responses.RequestsMock() as resp:
+            encoded_name = quote('Google Ads', safe='')
+            resp.add(
+                resp.GET,
+                self.prepare_url(WebsitesManageV2.GET_ONE_URL, website_id=encoded_name, params={
+                    'search_by': 'name'
+                }),
+                match_querystring=True,
+                json={
+                    'id': 42,
+                    'status': 'active',
+                    'kind': 'social_network_google_ads',
+                    'name': 'Google Ads',
+                    'site_url': 'https://ads.google.com/profile',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': 'google_ads_123',
+                    'validation_passed': True,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.getOne('Google Ads', search_by='name')
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertIn('status', result)
+        self.assertIn('kind', result)
+        self.assertEqual(result['name'], 'Google Ads')
+        self.assertEqual(result['kind'], 'social_network_google_ads')
+        self.assertEqual(result['account_id'], 'google_ads_123')
+
+    def test_get_website_request_with_name_default_search_by_id(self):
+        """Test that default search_by is 'id' when not specified"""
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(WebsitesManageV2.GET_ONE_URL, website_id=30),
+                json={
+                    'id': 30,
+                    'status': 'new',
+                    'kind': 'social_network_vk',
+                    'name': 'test website',
+                    'site_url': 'http://vk.com/xui',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': '',
+                    'validation_passed': False,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            # Test without search_by parameter (should default to 'id')
+            result = self.client.WebsitesManageV2.getOne(30)
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertEqual(result['id'], 30)
+        self.assertEqual(result['name'], 'test website')
+
+    def test_get_website_request_with_string_id_and_search_by_id(self):
+        """Test that string ID works when search_by='id'"""
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(WebsitesManageV2.GET_ONE_URL, website_id=123),
+                json={
+                    'id': 123,
+                    'status': 'active',
+                    'kind': 'website',
+                    'name': 'My Website',
+                    'site_url': 'https://example.com',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': '',
+                    'validation_passed': True,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            # Test with string ID and explicit search_by='id'
+            result = self.client.WebsitesManageV2.getOne('123', search_by='id')
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertEqual(result['id'], 123)
+        self.assertEqual(result['name'], 'My Website')
+
+    def test_get_website_request_with_special_characters_in_name(self):
+        """Test that names with special characters work correctly"""
+        with responses.RequestsMock() as resp:
+            # URL-encode the name to match what the library will send
+            encoded_name = quote('Test-Website_123', safe='')
+            resp.add(
+                resp.GET,
+                self.prepare_url(WebsitesManageV2.GET_ONE_URL, website_id=encoded_name, params={
+                    'search_by': 'name'
+                }),
+                match_querystring=True,
+                json={
+                    'id': 99,
+                    'status': 'active',
+                    'kind': 'website',
+                    'name': 'Test-Website_123',
+                    'site_url': 'https://test-website-123.com',
+                    'verification_code': '074a583c47',
+                    'creation_date': '2025-08-28T12:54:24',
+                    'is_old': False,
+                    'account_id': '',
+                    'validation_passed': True,
+                    'is_lite': False,
+                },
+                status=200
+            )
+
+            result = self.client.WebsitesManageV2.getOne('Test-Website_123', search_by='name')
+
+        self.assertIn('id', result)
+        self.assertIn('name', result)
+        self.assertEqual(result['name'], 'Test-Website_123')
+        self.assertEqual(result['id'], 99)
 
 
 if __name__ == '__main__':
