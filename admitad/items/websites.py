@@ -1,6 +1,8 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
+from urllib.parse import quote
+
 from admitad.items.base import Item
 
 
@@ -299,15 +301,25 @@ class WebsitesManageV2(Item):
             .request(url=self.GET_URL)
         )
 
-    def getOne(self, _id: int, **_: dict[str, int | str]) -> dict:
+    def getOne(self, _id: int | str, search_by: str = 'id', **_: dict[str, int | str]) -> dict:
         """
         Args:
-            _id (int) - website id
+            _id (int | str) - website id or name
+            search_by (str) - search type: 'id' or 'name'
 
         """
+        if search_by == 'id':
+            website_id = Item.sanitize_id(_id)
+        else:
+            website_id = quote(str(_id), safe='')
+
         requests_data = {
             'url': self.GET_ONE_URL,
-            'website_id': Item.sanitize_id(_id)
+            'website_id': website_id
         }
 
-        return self.transport.get().request(**requests_data)
+        transport = self.transport.get()
+        if search_by == 'name':
+            transport.update_data({'search_by': 'name'})
+
+        return transport.request(**requests_data)
