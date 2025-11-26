@@ -35,6 +35,7 @@ class Campaigns(Item):
                 'website': lambda x: Item.sanitize_integer_value(x, 'website', blank=True),
                 'has_tool': lambda x: Item.sanitize_string_array(x, 'has_tool', blank=True),
                 'language': lambda x: Item.sanitize_string_value(x, 'language', blank=True),
+                'promo_code_programs_only': lambda x: Item.sanitize_bool_value(x, 'promo_code_programs_only', blank=True),
             }
         }
 
