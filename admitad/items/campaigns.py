@@ -27,6 +27,8 @@ class Campaigns(Item):
             limit (int)
             offset (int)
             language (str)
+            promo_code_programs_only (bool)
+            takefluence_enabled_only (bool)
 
         """
         filtering = {
@@ -36,6 +38,7 @@ class Campaigns(Item):
                 'has_tool': lambda x: Item.sanitize_string_array(x, 'has_tool', blank=True),
                 'language': lambda x: Item.sanitize_string_value(x, 'language', blank=True),
                 'promo_code_programs_only': lambda x: Item.sanitize_bool_value(x, 'promo_code_programs_only', blank=True),
+                'takefluence_enabled_only': lambda x: Item.sanitize_bool_value(x, 'takefluence_enabled_only', blank=True),
             }
         }
 
