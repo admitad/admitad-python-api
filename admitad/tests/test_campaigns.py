@@ -30,6 +30,48 @@ class CampaignsTestCase(BaseTestCase):
                                                limit=10, offset=0, language='en')
 
         self.assertIn('status', result)
+        self.assertNotIn('promo_code_programs_only', self.prepare_url(Campaigns.URL, params={
+            'website': 10,
+            'has_tool': ['deeplink', 'retag'],
+            'limit': 10,
+            'offset': 0,
+            'language': 'en'
+        }))
+
+    def test_get_campaigns_request_with_promo_code_programs_only(self):
+        with responses.RequestsMock() as resp:
+            resp.add(
+                resp.GET,
+                self.prepare_url(Campaigns.URL, params={
+                    'website': 10,
+                    'has_tool': ['coupons'],
+                    'promo_code_programs_only': 'true',
+                    'limit': 10,
+                    'offset': 0,
+                    'language': 'en'
+                }),
+                match_querystring=True,
+                json={'status': 'ok'},
+                status=200
+            )
+            result = self.client.Campaigns.get(
+                website=10,
+                has_tool=['coupons'],
+                promo_code_programs_only=True,
+                limit=10,
+                offset=0,
+                language='en'
+            )
+
+        self.assertIn('status', result)
+        self.assertIn('promo_code_programs_only=true', self.prepare_url(Campaigns.URL, params={
+            'website': 10,
+            'has_tool': ['coupons'],
+            'promo_code_programs_only': 'true',
+            'limit': 10,
+            'offset': 0,
+            'language': 'en'
+        }))
 
     def test_get_campaigns_request_with_id(self):
         with responses.RequestsMock() as resp:
