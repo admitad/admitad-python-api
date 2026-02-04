@@ -73,8 +73,9 @@ class CampaignsForWebsite(Item):
 
     URL = Item.prepare_url('advcampaigns/website/%(website_id)s')
     SINGLE_URL = Item.prepare_url('advcampaigns/%(campaign_id)s/website/%(website_id)s')
+    GOTO_LINK_URL = Item.prepare_url('advcampaigns/%(campaign_id)s/website/%(website_id)s/gotolink/')
 
-    def get(self, _id, **kwargs):
+    def get(self, _id: int, **kwargs: dict) -> dict:
         """
         Here _id is a website id
 
@@ -91,7 +92,7 @@ class CampaignsForWebsite(Item):
 
         return self.transport.get().set_pagination(**kwargs).request(**request_data)
 
-    def getOne(self, _id, c_id, **kwargs):
+    def getOne(self, _id: int, c_id: int, **kwargs: dict) -> dict:
         """
         Here _id is a website id and c_id is a campaign id
 
@@ -102,6 +103,27 @@ class CampaignsForWebsite(Item):
         """
         request_data = {
             'url': self.SINGLE_URL,
+            'website_id': Item.sanitize_id(_id),
+            'campaign_id': Item.sanitize_id(c_id)
+        }
+
+        return self.transport.get().request(**request_data)
+
+    def getGotoLink(self, _id: int, c_id: int, **kwargs: dict) -> dict:
+        """
+        Get goto link for a website and campaign
+        Here _id is a website id and c_id is a campaign id
+
+        Args:
+            _id (int)
+            c_id (int)
+
+        Returns:
+            dict with 'gotolink' key
+
+        """
+        request_data = {
+            'url': self.GOTO_LINK_URL,
             'website_id': Item.sanitize_id(_id),
             'campaign_id': Item.sanitize_id(c_id)
         }
@@ -120,7 +142,7 @@ class CampaignsManage(Item):
     CONNECT_URL = Item.prepare_url('advcampaigns/%(campaign_id)s/attach/%(website_id)s')
     DISCONNECT_URL = Item.prepare_url('advcampaigns/%(campaign_id)s/detach/%(website_id)s')
 
-    def connect(self, c_id, w_id, **kwargs):
+    def connect(self, c_id: int, w_id: int, **kwargs: dict) -> dict:
         """
         Connect an advertising campaign for a website
         Here w_id is a website id and c_id is a campaign id
@@ -138,7 +160,7 @@ class CampaignsManage(Item):
 
         return self.transport.post().request(**request_data)
 
-    def disconnect(self, c_id, w_id, **kwargs):
+    def disconnect(self, c_id: int, w_id: int, **kwargs: dict) -> dict:
         """
         Disconnect an advertising campaign from a website
         Here w_id is a website id and c_id is a campaign id
