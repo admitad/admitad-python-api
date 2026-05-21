@@ -9,7 +9,7 @@ from admitad.items.base import Item
 __all__ = (
     'Websites',
     'WebsitesManage',
-    'WebsitesManageV2'
+    'WebsitesManageV2',
 )
 
 
