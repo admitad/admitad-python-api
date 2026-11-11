@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "admitad"
+version = "1.3.0"
+description = "A Python wrapper around the Admitad API"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Admitad Dev Bot", email = "dev@admitad.com" },
+]
+keywords = ["admitad"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Communications",
+    "Topic :: Internet",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.33,<3",
+]
+
+[project.optional-dependencies]
+test = [
+    "nose2",
+    "responses",
+]
+
+[project.urls]
+Homepage = "https://github.com/admitad/admitad-python-api"
+Download = "https://github.com/admitad/admitad-python-api/tarball/1.3.0"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["admitad*"]
