@@ -119,7 +119,7 @@ class PromoOffersRevocationStatus(Item):
 
     REVOCATION_STATUS_URL = Item.prepare_url('promo_offers/revocation_status/%(pk)s')
 
-    def get(self, _id: int, website_id: int) -> dict:
+    def get(self, _id: int, website_id: int | None = None) -> dict:
         """
         Args:
             _id (int): promo offer id
@@ -133,14 +133,13 @@ class PromoOffersRevocationStatus(Item):
                 ...
             ]
         """
-        request_data = {
-            'url': self.REVOCATION_STATUS_URL,
-            'pk': Item.sanitize_id(_id),
-            'website_id': Item.sanitize_id(website_id)
-        }
+        transport = self.transport.get()
+        if website_id is not None:
+            if isinstance(website_id, int):
+                website_id = Item.sanitize_id(website_id)
+            transport.set_data({'website_id': website_id})
 
-        return (
-            self.transport.get()
-            .set_data(request_data)
-            .request(url=self.REVOCATION_STATUS_URL, pk=Item.sanitize_id(_id))
+        return transport.request(
+            url=self.REVOCATION_STATUS_URL,
+            pk=Item.sanitize_id(_id),
         )
