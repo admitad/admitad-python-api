@@ -11,7 +11,7 @@ setup(
     url='https://github.com/admitad/admitad-python-api',
     download_url='https://github.com/admitad/admitad-python-api/tarball/1.3.0',
     keywords=['admitad'],
-    install_requires=['requests==2.32.5'],
+    install_requires=['requests==2.34.2'],
     tests_require=['nose2', 'responses'],
     test_suite='nose2.collector.collector',
     classifiers=[
